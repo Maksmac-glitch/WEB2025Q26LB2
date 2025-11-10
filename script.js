@@ -134,3 +134,39 @@ list.addEventListener("click", (e) => {
   }
 });
 
+list.addEventListener("click", (e) => {
+  const li = e.target.closest("li.task-item");
+  if (!li) return;
+  const id = li.getAttribute("data-id");
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  if (e.target.matches("button.btn-ghost")) {
+    const titleSpan = li.querySelector(".t-title");
+    const dateEl    = li.querySelector(".t-date");
+
+    const titleInputEdit = el("input", { type: "text" });
+    titleInputEdit.value = task.title;
+
+    const dateInputEdit = el("input", { type: "date" });
+    dateInputEdit.value = task.date || "";
+
+    const saveBtn = el("button", { className: "btn btn-primary", text: "Сохранить" });
+    const cancelBtn = el("button", { className: "btn btn-ghost", text: "Отмена" });
+
+    const textBox = titleSpan.parentElement;
+    clearNode(textBox);
+    textBox.append(titleInputEdit, dateInputEdit);
+
+    const right = li.querySelector(".t-right");
+    clearNode(right);
+    right.append(saveBtn, cancelBtn);
+
+    saveBtn.addEventListener("click", () => {
+      task.title = titleInputEdit.value.trim() || task.title;
+      task.date  = dateInputEdit.value || "";
+      render();
+    });
+    cancelBtn.addEventListener("click", render);
+  }
+});
