@@ -116,3 +116,21 @@ addBtn.addEventListener("click", () => {
 });
 
 render();
+
+list.addEventListener("click", (e) => {
+  const li = e.target.closest("li.task-item");
+  if (!li) return;
+  const id = li.getAttribute("data-id");
+  const task = tasks.find(t => t.id === id);
+  if (!task) return;
+
+  if (e.target.matches("button.btn-danger")) {
+    tasks = tasks.filter(t => t.id !== id);
+    render();
+  }
+  if (e.target.matches("input[type=checkbox]")) {
+    task.done = e.target.checked;
+    render();
+  }
+});
+
