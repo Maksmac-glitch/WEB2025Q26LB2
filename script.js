@@ -47,12 +47,14 @@ const filterSel   = el("select", {},
   el("option", { value: "open",  text: "Невыполненные" }),
   el("option", { value: "done",  text: "Выполненные" }),
 );
-const sortSel     = el("select", {},
+const sortSel = el("select", {},
+  el("option", { value: "manual",       text: "Ручной порядок" }),
   el("option", { value: "created-asc",  text: "Сначала старые" }),
   el("option", { value: "created-desc", text: "Сначала новые" }),
   el("option", { value: "date-asc",     text: "По дате ↑" }),
   el("option", { value: "date-desc",    text: "По дате ↓" }),
 );
+sortSel.value = "manual";
 
 const controls = el("section", { className: "controls" },
   el("div", { className: "controls-row" }, searchInput, filterSel, sortSel)
@@ -79,26 +81,27 @@ function createTask(title, dateStr) {
 }
 
 function taskItemView(task) {
-  const li   = el("li", { className: "task-item", draggable: "true", "data-id": task.id });
+  const li = el("li", { className: "task-item", draggable: "true", "data-id": task.id });
+
   const left = el("div", { className: "t-left" });
-  const cb   = el("input", { type: "checkbox" });
+  const cb   = el("input", { type: "checkbox", draggable: "false" });
   cb.checked = task.done;
 
   const title = el("span", { className: "t-title", text: task.title });
   const date  = el("time", { className: "t-date", datetime: task.date, text: task.date ? task.date : "" });
 
   const right = el("div", { className: "t-right" });
-  const editBtn = el("button", { className: "btn btn-ghost", text: "Ред." });
-  const delBtn  = el("button", { className: "btn btn-danger", text: "Удалить" });
+  const editBtn = el("button", { className: "btn btn-ghost", text: "Ред.", draggable: "false" }); 
+  const delBtn  = el("button", { className: "btn btn-danger", text: "Удалить", draggable: "false" }); 
 
-  if (task.done) li.classList.add("is-done");
-
-  left.append(cb, el("div", { className: "t-text" }, title, date));
+  const textBox = el("div", { className: "t-text" }, title, date);
+  left.append(cb, textBox);
   right.append(editBtn, delBtn);
+  if (task.done) li.classList.add("is-done");
   li.append(left, right);
-
   return li;
 }
+
 
 function clearNode(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 
@@ -183,16 +186,19 @@ function getFilteredSortedTasks() {
   if (filter === "open") arr = arr.filter(t => !t.done);
   if (filter === "done") arr = arr.filter(t =>  t.done);
 
-  const byDate = (a, b) => (a.date || "").localeCompare(b.date || "");
+  const byDate    = (a, b) => (a.date || "").localeCompare(b.date || "");
   const byCreated = (a, b) => a.createdAt - b.createdAt;
+  const byManual  = (a, b) => (a.order ?? 0) - (b.order ?? 0);
 
-  if (sort === "created-asc")  arr.sort(byCreated);
-  if (sort === "created-desc") arr.sort((a,b)=>byCreated(b,a));
-  if (sort === "date-asc")     arr.sort(byDate);
-  if (sort === "date-desc")    arr.sort((a,b)=>byDate(b,a));
+  if (sort === "manual")        arr.sort(byManual);
+  else if (sort === "created-asc")  arr.sort(byCreated);
+  else if (sort === "created-desc") arr.sort((a,b)=>byCreated(b,a));
+  else if (sort === "date-asc")     arr.sort(byDate);
+  else if (sort === "date-desc")    arr.sort((a,b)=>byDate(b,a));
 
   return arr;
 }
+
 
 [searchInput, filterSel, sortSel].forEach(ctrl => {
   ctrl.addEventListener("input", render);
@@ -231,6 +237,59 @@ function loadTasks() {
     tasks = [];
   }
 }
+
+
+let dragId = null;
+
+list.addEventListener("dragstart", (e) => {
+  const li = e.target.closest("li.task-item");
+  if (!li) return;
+  dragId = li.dataset.id;
+  e.dataTransfer.effectAllowed = "move";
+  e.dataTransfer.setData("text/plain", dragId);
+  li.classList.add("dragging");
+});
+
+list.addEventListener("dragend", (e) => {
+  const li = e.target.closest("li.task-item");
+  if (li) li.classList.remove("dragging");
+  dragId = null;
+});
+
+list.addEventListener("dragover", (e) => {
+  e.preventDefault();
+
+  const dragging = list.querySelector(".dragging");
+  if (!dragging) return;
+
+  const y = e.clientY;
+  const siblings = [...list.querySelectorAll("li.task-item:not(.dragging)")];
+
+  let anchor = null;
+  for (const li of siblings) {
+    const r = li.getBoundingClientRect();
+    const mid = r.top + r.height / 2;
+    if (y < mid) { anchor = li; break; }
+  }
+
+  if (anchor) {
+    list.insertBefore(dragging, anchor);
+  } else {
+    list.appendChild(dragging);
+  }
+});
+
+list.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const ids = [...list.querySelectorAll("li.task-item")].map(li => li.dataset.id);
+  tasks = ids.map(id => tasks.find(t => t.id === id));
+  tasks.forEach((t, i) => t.order = i);
+  sortSel.value = "manual";
+  render();                               
+});
+
+
+
 
 loadTasks(); 
 render();

@@ -1,0 +1,215 @@
+:root {
+  --bg: #0f172a;
+  --panel: #0b1220;
+  --muted: #94a3b8;
+  --border: rgba(148, 163, 184, .25);
+  --btn: #38bdf8;
+  --text: #e2e8f0;
+  --danger: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.app {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.add-form {
+  display: flex;
+  gap: .5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: .75rem;
+  border-radius: .75rem;
+  margin-bottom: .75rem;
+}
+
+.add-form input[type="text"] {
+  background: #0b1220;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .5rem .6rem;
+  border-radius: .5rem;
+}
+
+.add-form input[type="date"] {
+  background: #0b1220;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .5rem .6rem;
+  border-radius: .5rem;
+}
+
+.add-form .btn {
+  padding: .55rem 1rem;
+  border-radius: .5rem;
+  border: none;
+  background: var(--btn);
+  color: #06121e;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.controls {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: .75rem;
+  border-radius: .75rem;
+  margin-bottom: .75rem;
+}
+
+.controls-row {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.controls-row input {
+  background: #0b1220;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .5rem;
+  border-radius: .5rem;
+}
+
+.controls-row select {
+  background: #0b1220;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .5rem;
+  border-radius: .5rem;
+}
+
+.task-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: .75rem;
+  border-radius: .75rem;
+}
+
+.t-left {
+  display: flex;
+  gap: .5rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.t-left input[type="checkbox"] {
+  margin-top: .25rem;
+}
+
+.t-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.t-title {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.t-date {
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+.is-done .t-title {
+  text-decoration: line-through;
+  color: #9aa7bd;
+}
+
+.t-right {
+  display: flex;
+  gap: .5rem;
+}
+
+.btn {
+  cursor: pointer;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .35rem .6rem;
+  border-radius: .5rem;
+}
+
+.btn-danger {
+  background: var(--danger);
+  border: none;
+  color: #fff;
+  padding: .35rem .6rem;
+  border-radius: .5rem;
+}
+
+.btn-primary {
+  background: var(--btn);
+  border: none;
+  color: #06121e;
+}
+
+.task-list {
+  padding: 4px 0;
+}
+
+.task-item.dragging {
+  opacity: .6;
+}
+
+@media (max-width: 720px) {
+  .add-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .t-right {
+    flex-wrap: wrap;
+  }
+}
