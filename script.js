@@ -170,3 +170,33 @@ list.addEventListener("click", (e) => {
     cancelBtn.addEventListener("click", render);
   }
 });
+
+function getFilteredSortedTasks() {
+  const q = searchInput.value.trim().toLowerCase();
+  const filter = filterSel.value;
+  const sort = sortSel.value;
+
+  let arr = tasks.filter(t => (q ? t.title.toLowerCase().includes(q) : true));
+  if (filter === "open") arr = arr.filter(t => !t.done);
+  if (filter === "done") arr = arr.filter(t =>  t.done);
+
+  const byDate = (a, b) => (a.date || "").localeCompare(b.date || "");
+  const byCreated = (a, b) => a.createdAt - b.createdAt;
+
+  if (sort === "created-asc")  arr.sort(byCreated);
+  if (sort === "created-desc") arr.sort((a,b)=>byCreated(b,a));
+  if (sort === "date-asc")     arr.sort(byDate);
+  if (sort === "date-desc")    arr.sort((a,b)=>byDate(b,a));
+
+  return arr;
+}
+
+function render() {
+  clearNode(list);
+  getFilteredSortedTasks().forEach(t => list.appendChild(taskItemView(t)));
+}
+
+[searchInput, filterSel, sortSel].forEach(ctrl => {
+  ctrl.addEventListener("input", render);
+  ctrl.addEventListener("change", render);
+});
