@@ -288,7 +288,11 @@ list.addEventListener("drop", (e) => {
   render();                               
 });
 
+titleInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); addBtn.click(); }
+});
 
+window.addEventListener("load", () => titleInput.focus());
 
 
 loadTasks(); 
