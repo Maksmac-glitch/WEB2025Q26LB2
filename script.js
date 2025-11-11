@@ -22,6 +22,8 @@ function el(tag, props = {}, ...children) {
 })();
 
 let tasks = [];
+const STORAGE_KEY = "todo-list-v1";
+let booted = false;
 
 const app = el("div", { className: "app" });
 
@@ -102,7 +104,8 @@ function clearNode(node) { while (node.firstChild) node.removeChild(node.firstCh
 
 function render() {
   clearNode(list);
-  tasks.forEach(t => list.appendChild(taskItemView(t)));
+  getFilteredSortedTasks().forEach(t => list.appendChild(taskItemView(t)));
+  if (booted) saveTasks();
 }
 
 addForm.addEventListener("submit", (e) => e.preventDefault());
@@ -191,12 +194,46 @@ function getFilteredSortedTasks() {
   return arr;
 }
 
-function render() {
-  clearNode(list);
-  getFilteredSortedTasks().forEach(t => list.appendChild(taskItemView(t)));
-}
-
 [searchInput, filterSel, sortSel].forEach(ctrl => {
   ctrl.addEventListener("input", render);
   ctrl.addEventListener("change", render);
 });
+
+function saveTasks() {
+  try {
+    const plain = tasks.map(t => ({
+      id: t.id, title: t.title, date: t.date, done: !!t.done,
+      createdAt: Number(t.createdAt) || Date.now(),
+      order: Number(t.order) || 0
+    }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(plain));
+  } catch (e) {
+    console.warn("Не удалось сохранить задачи:", e);
+  }
+}
+
+function loadTasks() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { tasks = []; return; }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) { tasks = []; return; }
+    tasks = parsed.map((t, i) => ({
+      id: String(t.id || `${Date.now()}-${i}`),
+      title: String(t.title || "").trim(),
+      date: t.date ? String(t.date) : "",
+      done: !!t.done,
+      createdAt: Number(t.createdAt) || Date.now(),
+      order: Number(t.order ?? i)
+    }));
+  } catch (e) {
+    console.warn("Не удалось загрузить задачи:", e);
+    tasks = [];
+  }
+}
+
+loadTasks(); 
+render();
+booted = true;
+
+window.addEventListener("beforeunload", saveTasks);
